@@ -396,9 +396,14 @@ def check_dataset(data, autodownload=True):
         if data.get(k):  # prepend path
             data[k] = str(path / data[k]) if isinstance(data[k], str) else [str(path / x) for x in data[k]]
 
-    assert 'nc' in data, "Dataset 'nc' key missing."
+    # Added a print statement here
+    #print("Data dictionary content:", data)
+
+    assert 'nc' in data['Dataset'], "Dataset 'nc' key missing."
     if 'names' not in data:
-        data['names'] = [f'class{i}' for i in range(data['nc'])]  # assign class names if missing
+        #data['names'] = [f'class{i}' for i in range(data['nc'])]  # assign class names if missing
+        data['names'] = [f'class{i}' for i in range(data['Dataset']['nc'])]  # assign class names if missing
+
     train, val, test, s = [data.get(x) for x in ('train', 'val', 'test', 'download')]
     if val:
         val = [Path(x).resolve() for x in (val if isinstance(val, list) else [val])]  # val path
@@ -422,6 +427,8 @@ def check_dataset(data, autodownload=True):
                 print(f"Dataset autodownload {f'success, saved to {root}' if r in (0, None) else 'failure'}\n")
             else:
                 raise Exception('Dataset not found.')
+
+
 
     return data  # dictionary
 

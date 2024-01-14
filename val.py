@@ -240,7 +240,9 @@ def run(data,
     # Configure
     model.eval()
     is_coco = isinstance(data.get('val'), str) and data['val'].endswith('val2017.txt')  # COCO dataset
-    nc = 1 if single_cls else int(data['nc'])  # number of classes
+    #nc = 1 if single_cls else int(data['nc'])  # number of classes
+    nc = 1 if single_cls else int(data['Dataset']['nc'])  # number of classes
+
     iouv = torch.linspace(0.5, 0.95, 10).to(device)  # iou vector for mAP@0.5:0.95
     niou = iouv.numel()
 
@@ -251,7 +253,9 @@ def run(data,
         model.warmup(imgsz=(1 if pt else batch_size, 3, imgsz, imgsz))  # warmup
         pad = 0.0 if task == 'speed' else 0.5
         task = task if task in ('train', 'val', 'test') else 'val'  # path to train/val/test images
-        dataloader = create_dataloader(data[task], imgsz, batch_size, gs, single_cls, pad=pad, rect=True, cfg=val_cfg,
+        #dataloader = create_dataloader(data[task], imgsz, batch_size, gs, single_cls, pad=pad, rect=True, cfg=val_cfg,
+        #                               prefix=colorstr(f'{task}: '))[0]
+        dataloader = create_dataloader(data['Dataset'][task], imgsz, batch_size, gs, single_cls, pad=pad, rect=True, cfg=val_cfg,
                                        prefix=colorstr(f'{task}: '))[0]
 
     seen = 0
@@ -330,9 +334,14 @@ def run(data,
         lb = [targets[targets[:, 0] == i, 1:6] for i in range(nb)] if save_hybrid else []  # for autolabelling
         t3 = time_sync()
         if num_points > 0:
+            #print("HELLO WORLD 2")
             out = non_max_suppression_lmk_and_bbox(out, conf_thres, iou_thres, labels=lb, agnostic=single_cls, num_points=num_points)
         else:
-            out = non_max_suppression(out, conf_thres, iou_thres, labels=lb, multi_label=True, agnostic=single_cls)
+            #print("HELLO WORLD")
+            #print("Output type:", type(out))
+            #print("Output elements:", [type(element) for element in out])
+
+            out = non_max_suppression(out[0], conf_thres, iou_thres, labels=lb, multi_label=True, agnostic=single_cls)
         dt[2] += time_sync() - t3
         # print(time_sync() - t3)
 
