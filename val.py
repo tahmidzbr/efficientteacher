@@ -333,15 +333,22 @@ def run(data,
         # targets[:, 2:] *= torch.Tensor([width, height, width, height]).to(device)  # to pixels
         lb = [targets[targets[:, 0] == i, 1:6] for i in range(nb)] if save_hybrid else []  # for autolabelling
         t3 = time_sync()
+
+        # Check the output format and adapt accordingly
+        if isinstance(out, tuple):
+            out_processed = out[0]
+        else:
+            out_processed = out
+
         if num_points > 0:
             #print("HELLO WORLD 2")
-            out = non_max_suppression_lmk_and_bbox(out, conf_thres, iou_thres, labels=lb, agnostic=single_cls, num_points=num_points)
+            out = non_max_suppression_lmk_and_bbox(out_processed, conf_thres, iou_thres, labels=lb, agnostic=single_cls, num_points=num_points)
         else:
             #print("HELLO WORLD")
             #print("Output type:", type(out))
             #print("Output elements:", [type(element) for element in out])
 
-            out = non_max_suppression(out[0], conf_thres, iou_thres, labels=lb, multi_label=True, agnostic=single_cls)
+            out = non_max_suppression(out_processed, conf_thres, iou_thres, labels=lb, multi_label=True, agnostic=single_cls)
         dt[2] += time_sync() - t3
         # print(time_sync() - t3)
 
